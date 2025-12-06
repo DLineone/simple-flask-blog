@@ -28,6 +28,18 @@ def about():
     return render_template("about.html")
 
 
+@app.route('/posts')
+def posts():
+    posts = Post.query.order_by(Post.date.desc()).all()
+    return render_template("posts.html", posts=posts)
+
+
+@app.route('/posts/<int:id>')
+def post_detail(id):
+    post = Post.query.get(id)
+    return render_template("post.html", post=post)
+
+
 @app.route('/create-post', methods=['POST', 'GET'])
 def create_post():
     if request.method == "POST":
@@ -40,7 +52,7 @@ def create_post():
         try:
             db.session.add(post)
             db.session.commit()
-            return redirect('/')
+            return redirect('/posts')
         except:
             return 'error while adding post'
     else:

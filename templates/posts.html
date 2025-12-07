@@ -7,6 +7,9 @@ Posts
 {% block body %}
 <div class="container">
     <h1>Posts</h1>
+
+    {% if posts|length > 0 %}
+    
     <div>
         {% for element in posts %}
         <div class="alert alert-info">
@@ -17,5 +20,12 @@ Posts
         </div>
         {% endfor%}
     </div>
+
+    {% else %}
+        
+    <p>No posts yet</p>
+    
+    {% endif %}
+
 </div>
 {% endblock %}

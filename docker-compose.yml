@@ -1,17 +1,51 @@
+# version: "3.7"
+# services:
+#   app:
+#     image: python:3.9
+#     container_name: python-flask-sqlite
+#     environment:
+#       - FLASK_ENV=development
+#       - FLASK_APP=app.py
+#       - DATABASE=instance/blog.db
+#     working_dir: /
+#     volumes:
+#       - ./:/
+#     healthcheck:
+#       test: ["CMD", "curl", "-f", "http://localhost"]
+#       interval: 30s
+#       timeout: 10s
+#       retries: 3
+#     ports:
+#       - 5000:5000
+#     entrypoint: bash -c "apt-get update && apt-get install -y sqlite3 && pip install --upgrade pip==23.1.2 && pip install -r requirements.txt && gunicorn --bind 0.0.0.0:5000 --workers 4 app:app"
+
+# docker-compose.yml
 version: "3.7"
 services:
-  app:
-    image: python:3.10
-    container_name: python-flask-sqlite
-    environment:
-      - FLASK_ENV=development
-      - FLASK_APP=app.py
-      - DATABASE=database.db
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python_api
+    env_file:
+      - .env
     ports:
-      - 5000:5000
-    entrypoint: bash -c "apt-get update && apt-get install -y sqlite3 && pip install --upgrade pip==23.1.2 && gunicorn --bind 0.0.0.0:5000 --workers 4 app:app"
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      - ./app:/app/app
+      - ./data:/instance
+    command: >
+      gunicorn app.main:app
+      --host 0.0.0.0
+      --port ${APP_PORT}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os,urllib.request; urllib.request.urlopen(f\"http://localhost:{os.getenv('APP_PORT')}/health\").read()"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10

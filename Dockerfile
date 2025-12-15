@@ -1,7 +1,28 @@
-FROM ubuntu:latest
-RUN apt-get update -y
-RUN apt-get install -y python-pip python-dev build-essential
-COPY requirements.txt /tmp/requirements.txt
-RUN python3 -m pip install -r /tmp/requirements.txt
-ENTRYPOINT ['python']
-CMD ['app.py']
+# Dockerfile
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+WORKDIR /app
+
+# Системные пакеты (минимум; для многих либ хватает этого)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
+# Зависимости
+COPY requirements.txt /app/requirements.txt
+RUN python -m pip install --upgrade pip \
+ && pip install -r /app/requirements.txt
+
+# Код
+COPY app/ /app/app
+
+# Папка под SQLite (на нее повесим volume в compose)
+RUN mkdir -p /app/data
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

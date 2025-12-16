@@ -1,28 +1,35 @@
 # Dockerfile
-FROM python:3.12-slim
+FROM python:3.10
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    APP_PORT=5000
 
-WORKDIR /app
+RUN echo "hello there"
 
 # Системные пакеты (минимум; для многих либ хватает этого)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
+COPY . /app
+WORKDIR /app
 # Зависимости
-COPY requirements.txt /app/requirements.txt
-RUN python -m pip install --upgrade pip \
- && pip install -r /app/requirements.txt
+RUN python -m venv .venv
+RUN source .venv/bin/activate
+# Copy the requirements file into the container and install the dependencies
 
-# Код
-COPY app/ /app/app
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Папка под SQLite (на нее повесим volume в compose)
-RUN mkdir -p /app/data
+# Copy the rest of the application code into the container
+ENTRYPOINT ['python']
 
-EXPOSE 8000
+# Expose the port the Flask app runs on (default is 5000)
+EXPOSE 5000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+
+# EXPOSE 8000
+
+# CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

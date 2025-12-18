@@ -5,11 +5,19 @@ Password generation
 {% endblock %}
 
 {% block body %}
+<script>
+
+function copy_to_clipboard( text ) {
+    navigator.clipboard.writeText( text );
+    alert("Passwrod had been copied to clipboard!");
+}
+
+</script>
 <div class="container">
     <h2>Create password</h2>
     <form method="post">
 
-        <input type="text" name="password" id="password" class="form-control"  value="{{ password }}"/><br>
+        <input type="text" readonly onclick="copy_to_clipboard('{{ password }}')" name="password" id="password" class="form-control"  value="{{ password }}"/><br>
         <!-- <div data-mdb-input-init class="form-outline" style="width: 22rem;"> -->
             <input value="{{length}}" min="12" max="30" type="number" name="length" id="length" class="form-control" />
             <label class="form-label" for="length">Password length</label>

@@ -20,6 +20,6 @@ def get_password(length=12, special=True, numbers=True, uppercase=True):
         randomchar = random.choice(char_list)
         password.append(randomchar)
 
-    print(f'Most recent passwrod: {''.join(password)}')
+    print(f'Most recent passwrod: {"".join(password)}')
 
     return ''.join(password)

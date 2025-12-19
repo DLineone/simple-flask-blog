@@ -9,6 +9,9 @@
 ![](assets/edit.png)
 *Edit post function*
 
+![](assets/pass-gen.png)
+*Generate password*
+
 ## Getting Started
 
 Install the required dependencies:

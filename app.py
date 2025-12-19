@@ -1,9 +1,15 @@
+import os
+import json
 from flask import Flask, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from dotenv import load_dotenv
+from utils.get_password import get_password
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///blog.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 db = SQLAlchemy(app)
 
 class Post(db.Model):
@@ -86,7 +92,24 @@ def post_update(id):
             return 'error while updating post'
     else:
         return render_template("update_post.html", post=post)
+    
+
+@app.route('/pass-gen', methods=['POST', 'GET'])
+def pass_gen():
+    if request.method == "POST":
+        json.dumps(request.form)
+        length = int(request.form['length'])
+        special = False if request.form.get('special') is None else True
+        numbers = False if request.form.get('numbers') is None else True
+        uppercase = False if request.form.get('uppercase') is None else True
+        
+        password = get_password(length, special, numbers, uppercase)
+    
+        return render_template("pass_gen.html", password=password, length=length, special=special, numbers=numbers, uppercase=uppercase)
+    else:
+        password = get_password(12, False, False, False)
+        return render_template("pass_gen.html", password=password, length=12, special=False, numbers=False, uppercase=False)
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)

@@ -1,17 +1,23 @@
-version: "3.7"
+version: '3'
 services:
-  app:
-    image: python:3.10
-    container_name: python-flask-sqlite
+  flask:
+    # Путь до Dockerfile
+    build: .
+    # Имя для создаваемого контейнера
+    container_name: simple-flask-blog
+    # Создание переменных окружения в контейнере
     environment:
+      # для отладки (при запуске в релиз убрать!)
       - FLASK_ENV=development
-      - FLASK_APP=app.py
-      - DATABASE=database.db
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      ## Позволяет отслеживать процесс работы приложения в командной строке
+      - PYTHONUNBUFFERED=True                   
+      ##
+    # Прокладывам путь для файлов. Все файлы, которые хранятся у вас в 
+    # директории ./backend, появятся в директории контейнера /backend
+    volumes:
+      - ./:/app
+    # Открываем порт в контейнер
+    # Порт, который будет смотреть наружу : порт который используется внутри контейнера
     ports:
-      - 5000:5000
-    entrypoint: bash -c "apt-get update && apt-get install -y sqlite3 && pip install --upgrade pip==23.1.2 && gunicorn --bind 0.0.0.0:5000 --workers 4 app:app"
+      - "5000:5000"
+    command: gunicorn app:app -b 0.0.0.0:5000 --reload
